@@ -1,19 +1,28 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
-function createWindow () {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    show: false,
     webPreferences: {
+      offscreen: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
+
+  mainWindow.webContents.on('paint', (event, dirty, image) => {
+    fs.writeFileSync('ex.png', image.toPNG())
+  })
+  mainWindow.webContents.setFrameRate(60)
+  console.log(`The screenshot has been successfully saved to ${path.join(process.cwd(), 'ex.png')}`)
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
